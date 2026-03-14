@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS Spam Classifier - ML Powered</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📱 SMS Spam Classifier</h1>
+            <p class="subtitle">AI-Powered Spam Detection using Machine Learning</p>
+            {% if metadata %}
+            <div class="model-info">
+                <span class="badge">Model: {{ metadata.model_name }}</span>
+                <span class="badge">Accuracy: {{ "%.2f"|format(metadata.accuracy * 100) }}%</span>
+            </div>
+            {% endif %}
+        </div>
+        
+        <form method="POST" action="/predict" id="predictionForm">
+            <div class="form-group">
+                <label for="message">Enter SMS Message:</label>
+                <textarea 
+                    id="message"
+                    name="message" 
+                    placeholder="Type or paste your SMS message here..."
+                    required
+                    rows="6">{{ message if message else '' }}</textarea>
+            </div>
+            <button type="submit" class="btn-predict">
+                <span class="btn-text">🔍 Analyze Message</span>
+            </button>
+        </form>
+        
+        {% if error %}
+        <div class="result-box error-box">
+            <div class="result-icon">⚠️</div>
+            <h2>Error</h2>
+            <p>{{ error }}</p>
+        </div>
+        {% endif %}
+        
+        {% if prediction %}
+        <div class="result-box {{ 'spam-box' if prediction == 'Spam' else 'ham-box' }}">
+            <div class="result-icon">
+                {% if prediction == 'Spam' %}
+                🚫
+                {% else %}
+                ✅
+                {% endif %}
+            </div>
+            <h2 class="result-title">{{ prediction }}</h2>
+            {% if confidence %}
+            <div class="confidence-bar-container">
+                <div class="confidence-label">Confidence: {{ confidence }}</div>
+                <div class="confidence-bar">
+                    <div class="confidence-fill {{ 'spam-fill' if prediction == 'Spam' else 'ham-fill' }}" 
+                         style="width: {{ confidence }}"></div>
+                </div>
+            </div>
+            {% endif %}
+            <p class="result-description">
+                {% if prediction == 'Spam' %}
+                ⚠️ This message appears to be <strong>spam</strong>. It may contain phishing attempts, scams, or unwanted promotional content.
+                {% else %}
+                ✅ This message appears to be <strong>legitimate</strong>. It looks like a normal, non-spam message.
+                {% endif %}
+            </p>
+        </div>
+        {% endif %}
+        
+        <div class="examples-section">
+            <h3>📝 Try These Examples</h3>
+            <div class="examples-grid">
+                <div class="example-card ham-card">
+                    <div class="example-header">
+                        <span class="example-icon">✅</span>
+                        <strong>Normal Messages</strong>
+                    </div>
+                    <ul class="example-list">
+                        <li onclick="fillMessage(this)">Hi, are we meeting tomorrow?</li>
+                        <li onclick="fillMessage(this)">Can you pick up milk on your way home?</li>
+                        <li onclick="fillMessage(this)">Thanks for the birthday wishes!</li>
+                        <li onclick="fillMessage(this)">Let's catch up this weekend</li>
+                        <li onclick="fillMessage(this)">I'll be there in 10 minutes</li>
+                    </ul>
+                </div>
+                
+                <div class="example-card spam-card">
+                    <div class="example-header">
+                        <span class="example-icon">🚫</span>
+                        <strong>Spam Messages</strong>
+                    </div>
+                    <ul class="example-list">
+                        <li onclick="fillMessage(this)">CONGRATULATIONS! You won $1000! Click here now!</li>
+                        <li onclick="fillMessage(this)">URGENT! Your account will be closed! Verify now!</li>
+                        <li onclick="fillMessage(this)">FREE PRIZE! You are the winner! Call now!</li>
+                        <li onclick="fillMessage(this)">You have won £5000 cash prize! Text WIN to claim!</li>
+                        <li onclick="fillMessage(this)">Your mobile number has won £2000! Claim now!</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <h3>ℹ️ How It Works</h3>
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-number">1</div>
+                    <h4>Text Preprocessing</h4>
+                    <p>Message is cleaned by removing punctuation, numbers, and stopwords</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-number">2</div>
+                    <h4>Feature Extraction</h4>
+                    <p>TF-IDF vectorization converts text into numerical features</p>
+                </div>
+                <div class="info-card">
+                    <div class="info-number">3</div>
+                    <h4>ML Classification</h4>
+                    <p>Trained model analyzes patterns and predicts spam or not spam</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function fillMessage(element) {
+            document.getElementById('message').value = element.textContent;
+            document.getElementById('message').focus();
+            // Smooth scroll to form
+            document.getElementById('predictionForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    </script>
+</body>
+</html>
